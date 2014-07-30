@@ -55,6 +55,7 @@ static const char *FILTER_USAGE_MESSAGE =
 "      -v, --verbose                    display verbose output\n"
 "      -p, --prefix=PREFIX              use PREFIX for the names of the index files (default: prefix of the input file)\n"
 "      -o, --outfile=FILE               write the qc-passed reads to FILE (default: READSFILE.filter.pass.fa)\n"
+"      -z, --zip-outfile                compress the outfiles\n"
 "      -t, --threads=NUM                use NUM threads to compute the overlaps (default: 1)\n"
 "      -d, --sample-rate=N              use occurrence array sample rate of N in the FM-index. Higher values use significantly\n"
 "                                       less memory at the cost of higher runtime. This value must be a power of 2 (default: 128)\n"
@@ -88,12 +89,13 @@ namespace opt
     static bool kmerBothStrand = false;
     static bool hpCheck = false;
     static bool lowComplexityCheck = false;
+    static bool zipOutFile = false;
 
     static int kmerLength = 27;
     static int kmerThreshold = 3;
 }
 
-static const char* shortopts = "p:d:t:o:k:x:v";
+static const char* shortopts = "p:d:t:o:k:x:v:z";
 
 enum { OPT_HELP = 1, OPT_VERSION, OPT_SUBSTRING_ONLY, OPT_NO_RMDUP, OPT_NO_KMER, OPT_KMER_BOTH_STRAND, OPT_CHECK_HPRUNS, OPT_CHECK_COMPLEXITY };
 
@@ -101,6 +103,7 @@ static const struct option longopts[] = {
     { "verbose",               no_argument,       NULL, 'v' },
     { "threads",               required_argument, NULL, 't' },
     { "outfile",               required_argument, NULL, 'o' },
+    { "zip-outfile",           no_argument,       NULL, 'z' },
     { "prefix",                required_argument, NULL, 'p' },
     { "sample-rate",           required_argument, NULL, 'd' },
     { "kmer-size",             required_argument, NULL, 'k' },
@@ -221,6 +224,7 @@ void parseFilterOptions(int argc, char** argv)
         {
             case 'p': arg >> opt::prefix; break;
             case 'o': arg >> opt::outFile; break;
+            case 'z': opt::zipOutFile = true; break;
             case 't': arg >> opt::numThreads; break;
             case 'd': arg >> opt::sampleRate; break;
             case 'k': arg >> opt::kmerLength; break;
@@ -287,8 +291,8 @@ void parseFilterOptions(int argc, char** argv)
 
     if(opt::outFile.empty())
     {
-        opt::outFile = opt::prefix + ".filter.pass.fa";
-        opt::discardFile = opt::prefix + ".discard.fa";
+        opt::outFile = opt::zipOutFile ? opt::prefix + ".filter.pass.fa" + GZIP_EXT : opt::prefix + ".filter.pass.fa";
+        opt::discardFile = opt::zipOutFile ? opt::prefix + ".discard.fa" + GZIP_EXT : opt::prefix + ".discard.fa";
     }
     else
     {
