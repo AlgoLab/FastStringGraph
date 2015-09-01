@@ -13,6 +13,27 @@
 #include "ReadInfoTable.h"
 #include "SeqReader.h"
 
+ReadInfoTable::ReadInfoTable(const size_t& num_expected,
+                             const ReadInfoOption& options) : m_numericIDs(false)
+{
+  if(options == RIO_NUMERICID)
+    m_numericIDs = true;
+
+  if(num_expected > 0)
+    {
+      m_lengths.reserve(num_expected);
+      if(!m_numericIDs)
+        m_ids.reserve(num_expected);
+    }
+}
+
+void ReadInfoTable::add(const SeqRecord& sr)
+{
+  m_lengths.push_back(sr.seq.length());
+  if(!m_numericIDs)
+    m_ids.push_back(sr.id);
+}
+
 // Read the sequences from a file
 ReadInfoTable::ReadInfoTable(std::string filename, 
                              size_t num_expected, 

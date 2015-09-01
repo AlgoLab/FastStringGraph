@@ -97,6 +97,9 @@ AC_SUBST(CFLAGS, "-O3")
 AC_SUBST(CPPFLAGS, "$CPPFLAGS $openmp_cppflags $sparsehash_include $bamtools_include")
 AC_SUBST(LDFLAGS, "$openmp_cppflags $external_malloc_ldflags $bamtools_ldflags $LDFLAGS")
 
+AC_CHECK_HEADER([tbb/tbb.h],,[AC_MSG_ERROR([tbb non found])])
+AC_CHECK_LIB([tbb], [main],,[AC_MSG_ERROR([tbb non found])])
+
 # We always need to specify to link in bamtools
 AC_SUBST(LIBS, "$LIBS -lbamtools")
 
@@ -139,6 +142,7 @@ AC_CONFIG_FILES([Makefile
 		SuffixTools/Makefile
         GraphDiff/Makefile
         Scaffold/Makefile
+		FSG/Makefile
 		SGA/Makefile])
 
 AC_OUTPUT

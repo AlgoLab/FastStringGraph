@@ -7,7 +7,7 @@
 // ConnectProcess - Wrapper to resolve the sequence
 // connecting two ends of a paired end read
 //
-#ifndef CONNECTROCESS_H
+#ifndef CONNECTPROCESS_H
 #define CONNECTPROCESS_H
 
 #include "Util.h"

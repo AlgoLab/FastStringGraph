@@ -8,6 +8,10 @@ find overlaps between sequence reads. The core algorithms are described in this 
 
 http://bioinformatics.oxfordjournals.org/cgi/content/abstract/26/12/i367
 
+This version also includes a faster algorithm for the core task of computing
+the string graph, called FSG, designed by Paola Bonizzoni, Gianluca Della
+Vedova, Yuri Pirola, Marco Previtali, and Raffaella Rizzi.
+
 -------------
 Compiling SGA
 
@@ -15,6 +19,7 @@ SGA dependencies:
     -google sparse hash library (http://code.google.com/p/google-sparsehash/)
     -the bamtools library (https://github.com/pezmaster31/bamtools)
     -zlib (http://www.zlib.net/)
+    -Intel Threading Building Blocks library (https://www.threadingbuildingblocks.org/)
     -(optional but suggested) the jemalloc memory allocator (http://www.canonware.com/jemalloc/download.html)
 
 Additionally, the pipeline python scripts use the following modules. These
@@ -110,6 +115,15 @@ the minimum length of the overlaps to find. By default only non-transitive (irre
 between identical sequences. If all overlaps between reads are desired, the --exhaustive option can be specified.
 This program is threaded. The output file is READS.asqg.gz by default.
 
+* sga fsg -m N -t THREADS READS
+
+Find overlaps between reads to construct the string graph with the FSG
+algorithm, usually faster (but more memory intensive) than the default one. The
+-m parameter specifies the minimum length of the overlaps to find.
+With this algorithm only non-transitive (irreducible) edges are output.
+This program is threaded (and T specifies the number of threads).
+The output file is READS.asqg.gz by default.
+
 * sga assemble READS.asqg.gz
 
 Assemble takes the output of the overlap step and constructs contigs. The output is in contigs.fa by default. Options
@@ -162,5 +176,10 @@ property, including patents, are granted to you under this license.
 -------
 Credits
 
-Written by Jared Simpson.
-The algorithms were developed by Jared Simpson and Richard Durbin.
+The original SGA suite has been written by Jared Simpson.
+All the algorithms but FSG were developed by Jared Simpson and Richard Durbin.  
+
+FSG has been designed by Paola Bonizzoni, Gianluca Della Vedova, Yuri Pirola,
+Marco Previtali and Raffaella Rizzi, and has been implemented by Yuri Pirola and
+Marco Previtali.
+Please address to them any question related to FSG.

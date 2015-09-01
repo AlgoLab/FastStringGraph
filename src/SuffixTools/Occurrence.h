@@ -15,10 +15,10 @@
 // Power of 2 macros
 
 // return true if x is a power of 2
-#define IS_POWER_OF_2(x) ((x) & ((x) - 1)) == 0
+#define IS_POWER_OF_2(x) (((x) & ((x) - 1)) == 0)
 
 // return the x % y given that y is a power of 2
-#define MOD_POWER_2(x, y) (x) & ((y) - 1)
+#define MOD_POWER_2(x, y) ((x) & ((y) - 1))
 class SBWT;
 
 class Occurrence

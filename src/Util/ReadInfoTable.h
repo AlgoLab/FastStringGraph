@@ -34,10 +34,13 @@ class ReadInfoTable
     public:
         //
         ReadInfoTable() {}
+        ReadInfoTable(const size_t& num_expected = 0,
+                      const ReadInfoOption& options = RIO_NONE);
 
         // Load the table using the read in filename
         // If num_expected > 0, reserve room in the table for num_expected reads
-        ReadInfoTable(std::string filename, size_t num_expected = 0, ReadInfoOption options = RIO_NONE);
+        ReadInfoTable(std::string filename, size_t num_expected = 0,
+                      ReadInfoOption options = RIO_NONE);
         ~ReadInfoTable();
 
         //
@@ -48,6 +51,8 @@ class ReadInfoTable
         size_t countSumLengths() const;
         void clear();
 
+        // Iteratively build the infotable
+        void add(const SeqRecord& sr);
     private:
 
         std::vector<int> m_lengths;

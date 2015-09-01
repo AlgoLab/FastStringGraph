@@ -352,3 +352,148 @@ void RLBWT::printRunLengths() const
     printf("Minimal runs: %zu\n", totalRuns - adjacentSingletons / 2);
 }
 
+void
+RLBWT::getIntervalFullOcc_impl(const size_t b, const size_t e,
+                               AlphaCount64& occ_b, AlphaCount64& occ_e) const {
+
+    const size_t large_idx_b = b >> m_largeShiftValue;
+    const size_t small_idx_b = b >> m_smallShiftValue;
+
+    // Start from the rightmost large marker + small marker before b
+    occ_b = m_largeMarkers[large_idx_b].counts;
+    alphacount_add16(occ_b, m_smallMarkers[small_idx_b].counts);
+    size_t current_unit_idx = m_largeMarkers[large_idx_b].unitIndex + m_smallMarkers[small_idx_b].unitCount;
+    size_t current_position = occ_b.getSum();
+
+    // Since the BWT is RLE the current position can be actually be larger than b.
+    // In this case, go back of one unit
+    while (current_position > b) {
+      --current_unit_idx;
+      const RLUnit& current_unit= m_rlString[current_unit_idx];
+      const size_t count = current_unit.getCount();
+      char symbol = current_unit.getChar();
+      occ_b.subtract(symbol, count);
+      current_position -= count;
+    }
+
+    // Advance until b
+    char symbol= '\0';
+    while (current_position < b) {
+      const RLUnit& current_unit= m_rlString[current_unit_idx];
+      const size_t count = current_unit.getCount();
+      symbol = current_unit.getChar();
+      occ_b.add(symbol, count);
+      current_position += count;
+      ++current_unit_idx;
+    }
+
+    // Copy occurrences for e
+    occ_e = occ_b;
+
+    // if b was 'inside' a run, subtract some occurrences
+    if (current_position > b)
+      occ_b.subtract(symbol, current_position-b);
+
+    // SAFETY CHECK
+    //if (occ_b != getFullOcc(b-1)) throw std::exception();
+
+    // Advance until e
+    while (current_position < e) {
+      const RLUnit& current_unit= m_rlString[current_unit_idx];
+      const size_t count = current_unit.getCount();
+      symbol = current_unit.getChar();
+      occ_e.add(symbol, count);
+      current_position += count;
+      ++current_unit_idx;
+    }
+
+    // if e was 'inside' a run, subtract some occurrences
+    if (current_position > e)
+      occ_e.subtract(symbol, current_position-e);
+
+    // SAFETY CHECK
+    //if (occ_e != getFullOcc(e-1)) throw std::exception();
+}
+
+void
+RLBWT::getTriIntervalFullOcc_impl(const size_t b, const size_t e1, const size_t e2,
+                                  AlphaCount64& occ_b, AlphaCount64& occ_e1, AlphaCount64& occ_e2) const {
+
+    const size_t large_idx_b = b >> m_largeShiftValue;
+    const size_t small_idx_b = b >> m_smallShiftValue;
+
+    // Start from the rightmost large marker + small marker before b
+    occ_b = m_largeMarkers[large_idx_b].counts;
+    alphacount_add16(occ_b, m_smallMarkers[small_idx_b].counts);
+    size_t current_unit_idx = m_largeMarkers[large_idx_b].unitIndex + m_smallMarkers[small_idx_b].unitCount;
+    size_t current_position = occ_b.getSum();
+
+    // Since the BWT is RLE the current position can be actually be larger than b.
+    // In this case, go back of one unit
+    while (current_position > b) {
+      --current_unit_idx;
+      const RLUnit& current_unit= m_rlString[current_unit_idx];
+      const size_t count = current_unit.getCount();
+      char symbol = current_unit.getChar();
+      occ_b.subtract(symbol, count);
+      current_position -= count;
+    }
+
+    // Advance until b
+    char symbol= '\0';
+    while (current_position < b) {
+      const RLUnit& current_unit= m_rlString[current_unit_idx];
+      const size_t count = current_unit.getCount();
+      symbol = current_unit.getChar();
+      occ_b.add(symbol, count);
+      current_position += count;
+      ++current_unit_idx;
+    }
+
+    // Copy occurrences for e1
+    occ_e1 = occ_b;
+
+    // if b was 'inside' a run, subtract some occurrences
+    if (current_position > b)
+      occ_b.subtract(symbol, current_position-b);
+
+    // SAFETY CHECK
+    //if (occ_b != getFullOcc(b-1)) throw std::exception();
+
+    // Advance until e1
+    while (current_position < e1) {
+      const RLUnit& current_unit= m_rlString[current_unit_idx];
+      const size_t count = current_unit.getCount();
+      symbol = current_unit.getChar();
+      occ_e1.add(symbol, count);
+      current_position += count;
+      ++current_unit_idx;
+    }
+
+    // Copy occurrences for e2
+    occ_e2 = occ_e1;
+
+    // if e2 was 'inside' a run, subtract some occurrences
+    if (current_position > e1)
+      occ_e1.subtract(symbol, current_position-e1);
+
+    // SAFETY CHECK
+    //if (occ_e1 != getFullOcc(e1-1)) throw std::exception();
+
+    // Advance until e2
+    while (current_position < e2) {
+      const RLUnit& current_unit= m_rlString[current_unit_idx];
+      const size_t count = current_unit.getCount();
+      symbol = current_unit.getChar();
+      occ_e2.add(symbol, count);
+      current_position += count;
+      ++current_unit_idx;
+    }
+
+    // if e2 was 'inside' a run, subtract some occurrences
+    if (current_position > e2)
+      occ_e2.subtract(symbol, current_position-e2);
+
+    // SAFETY CHECK
+    //if (occ_e2 != getFullOcc(e2-1)) throw std::exception();
+}

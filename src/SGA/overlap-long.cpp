@@ -199,7 +199,9 @@ int overlapLongMain(int argc, char** argv)
     // Make a prefix for the temporary hits files
     size_t n_reads = reads.getCount();
 
+#ifdef HAVE_OPENMP
     omp_set_num_threads(opt::numThreads);
+#endif
 
 #pragma omp parallel for
     for(size_t read_idx = 0; read_idx < n_reads; ++read_idx)

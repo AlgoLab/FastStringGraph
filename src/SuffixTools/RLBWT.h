@@ -195,6 +195,26 @@ class RLBWT
             }
         }
 
+  void getIntervalFullOcc(const size_t b, const size_t e,
+                          AlphaCount64& occ_b, AlphaCount64& occ_e) const {
+    if (e-b > m_largeSampleRate) {
+      occ_b = getFullOcc(b);
+      occ_e = getFullOcc(e);
+    } else {
+      getIntervalFullOcc_impl(b+1, e+1, occ_b, occ_e);
+    }
+  }
+
+  void getTriIntervalFullOcc(const size_t b, const size_t e1, const size_t e2,
+                             AlphaCount64& occ_b, AlphaCount64& occ_e1, AlphaCount64& occ_e2) const {
+    if (e2-b > m_largeSampleRate) {
+      getIntervalFullOcc(b, e1, occ_b, occ_e1);
+      occ_e2 = getFullOcc(e2);
+    } else {
+      getTriIntervalFullOcc_impl(b+1, e1+1, e2+1, occ_b, occ_e1, occ_e2);
+    }
+  }
+
         // Adds to the count of symbol b in the range [targetPosition, currentPosition)
         // Precondition: currentPosition <= targetPosition
         inline void accumulateBackwards(char b, size_t& running_count, size_t currentUnitIndex, size_t currentPosition, const size_t targetPosition) const
@@ -297,5 +317,10 @@ class RLBWT
         int m_smallShiftValue;
         int m_largeShiftValue;
 
+  void getIntervalFullOcc_impl(const size_t b, const size_t e,
+                               AlphaCount64& occ_b, AlphaCount64& occ_e) const;
+
+  void getTriIntervalFullOcc_impl(const size_t b, const size_t e1, const size_t e2,
+                                  AlphaCount64& occ_b, AlphaCount64& occ_e1, AlphaCount64& occ_e2) const;
 };
 #endif
